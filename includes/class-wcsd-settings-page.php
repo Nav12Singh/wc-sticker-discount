@@ -85,6 +85,7 @@ class WCSD_Settings_Page {
 
 		if ( $this->hook_suffix ) {
 			add_action( 'load-' . $this->hook_suffix, array( $this, 'maybe_save' ) );
+			add_action( 'load-' . $this->hook_suffix, array( $this, 'hide_third_party_notices' ) );
 		}
 	}
 
@@ -117,20 +118,21 @@ class WCSD_Settings_Page {
 					'thousandSep' => wc_get_price_thousand_separator(),
 				),
 				'i18n'         => array(
-					'active'    => __( 'Active', 'wc-sticker-discount' ),
-					'off'       => __( 'Off', 'wc-sticker-discount' ),
+					'active'           => __( 'Active', 'wc-sticker-discount' ),
+					'off'              => __( 'Off', 'wc-sticker-discount' ),
 					/* translators: %s: number of stickers. */
-					'inCart'    => __( '%s in cart', 'wc-sticker-discount' ),
+					'inCart'           => __( '%s in cart', 'wc-sticker-discount' ),
 					/* translators: %s: number of stickers still needed. */
-					'needMore'  => __( 'Add %s more to unlock the discount.', 'wc-sticker-discount' ),
-					'applied'   => __( 'Discount applied.', 'wc-sticker-discount' ),
-					'disabled'  => __( 'The discount is off, so this cart pays full price.', 'wc-sticker-discount' ),
+					'needMore'         => __( 'Add %s more to unlock the discount.', 'wc-sticker-discount' ),
+					'applied'          => __( 'Discount applied.', 'wc-sticker-discount' ),
+					'disabled'         => __( 'The discount is off, so this cart pays full price.', 'wc-sticker-discount' ),
 					/* translators: %s: number of characters still needed. */
-					'typeMore'  => __( 'Type %s more characters to search', 'wc-sticker-discount' ),
-					'typeOne'   => __( 'Type 1 more character to search', 'wc-sticker-discount' ),
-					'searching' => __( 'Searching…', 'wc-sticker-discount' ),
-					'noMatches' => __( 'No categories found', 'wc-sticker-discount' ),
-					'loadError' => __( 'Could not load categories. Try again.', 'wc-sticker-discount' ),
+					'typeMore'         => __( 'Type %s more characters to search', 'wc-sticker-discount' ),
+					'typeOne'          => __( 'Type 1 more character to search', 'wc-sticker-discount' ),
+					'searching'        => __( 'Searching…', 'wc-sticker-discount' ),
+					'noMatches'        => __( 'No categories found', 'wc-sticker-discount' ),
+					'loadError'        => __( 'Could not load categories. Try again.', 'wc-sticker-discount' ),
+					'categoryRequired' => __( 'Select at least one eligible category.', 'wc-sticker-discount' ),
 				),
 			)
 		);
@@ -157,6 +159,24 @@ class WCSD_Settings_Page {
 			wp_safe_redirect( self::get_url() );
 			exit;
 		}
+	}
+
+	/**
+	 * Keep this page free of other plugins' admin notices.
+	 *
+	 * The page's own messages are printed inside the page, not through these hooks.
+	 */
+	public function hide_third_party_notices() {
+		// Runs just before WordPress prints notices, so late registrations are caught too.
+		add_action(
+			'in_admin_header',
+			function () {
+				foreach ( array( 'admin_notices', 'all_admin_notices', 'network_admin_notices', 'user_admin_notices' ) as $hook ) {
+					remove_all_actions( $hook );
+				}
+			},
+			PHP_INT_MAX
+		);
 	}
 
 	/**
@@ -439,33 +459,37 @@ class WCSD_Settings_Page {
 	}
 
 	/**
-	 * Only keep IDs of existing product categories.
+	 * Only keep IDs of existing product categories; at least one is required.
 	 *
 	 * @param mixed $value Submitted category IDs.
-	 * @return string[]
+	 * @return string[]|null Null keeps the previous categories.
 	 */
 	public function sanitize_categories( $value ) {
-		$ids = array_values( array_unique( array_filter( array_map( 'absint', (array) $value ) ) ) );
+		$ids       = array_values( array_unique( array_filter( array_map( 'absint', (array) $value ) ) ) );
+		$valid_ids = array();
 
-		if ( empty( $ids ) ) {
-			return array();
+		if ( $ids ) {
+			$terms = get_terms(
+				array(
+					'taxonomy'   => 'product_cat',
+					'include'    => $ids,
+					'hide_empty' => false,
+					'fields'     => 'ids',
+				)
+			);
+
+			if ( ! is_wp_error( $terms ) ) {
+				// Keep the order the categories were chosen in.
+				$valid_ids = array_values( array_intersect( $ids, array_map( 'absint', $terms ) ) );
+			}
 		}
 
-		$valid_ids = get_terms(
-			array(
-				'taxonomy'   => 'product_cat',
-				'include'    => $ids,
-				'hide_empty' => false,
-				'fields'     => 'ids',
-			)
-		);
-
-		if ( is_wp_error( $valid_ids ) ) {
-			return array();
+		if ( empty( $valid_ids ) ) {
+			WC_Admin_Settings::add_error( __( 'Select at least one eligible category.', 'wc-sticker-discount' ) );
+			return null;
 		}
 
-		// Keep the order the categories were chosen in.
-		return array_map( 'strval', array_values( array_intersect( $ids, array_map( 'absint', $valid_ids ) ) ) );
+		return array_map( 'strval', $valid_ids );
 	}
 
 	/**
@@ -506,6 +530,7 @@ class WCSD_Settings_Page {
 					style="width: 400px;"
 					data-placeholder="<?php echo esc_attr( $placeholder ); ?>"
 					data-minimum_input_length="<?php echo esc_attr( self::MIN_SEARCH_LENGTH ); ?>"
+					required="required"
 				>
 					<?php foreach ( $selected as $term ) : ?>
 						<option value="<?php echo esc_attr( $term->term_id ); ?>" selected="selected"><?php echo esc_html( $term->name ); ?></option>

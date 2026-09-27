@@ -48,13 +48,13 @@ When the cart contains **5 or more eligible stickers**, a **10% discount** is ap
 |---|---|---|
 | Enable | Switch the discount on or off. | On |
 | Discount label | Text of the cart/checkout line. Required. For percentage discounts the rate is appended, e.g. "Sticker Discount (10%)". | Sticker Discount |
-| Eligible categories | Products in these categories and their sub-categories count as stickers. Type at least 3 characters to search (AJAX, like the Upsells field). Categories without products can be chosen too. | `stickers` |
+| Eligible categories | Required: at least one. Products in these categories and their sub-categories count as stickers. Type at least 3 characters to search (AJAX, like the Upsells field). Categories without products can be chosen too. | `stickers` |
 | Sale products | Exclude products that are already on sale. | On |
 | Minimum quantity | Total quantity of eligible products needed (whole number, 1 or more). | 5 |
 | Discount type | Percentage of the eligible products, or a fixed amount off them. | Percentage |
 | Discount value | 0–100 for a percentage; any amount of 0 or more for a fixed discount. A fixed amount is never more than the eligible products' total. | 10 |
 
-Invalid values are rejected with an error message and the previous value is kept. The page also has a **"Try the rule"** preview that shows the effect of the current form on a sample cart, including changes that have not been saved yet.
+Invalid values are rejected with an error message and the previous value is kept. Notices from other plugins are hidden on this page (they still appear elsewhere in the admin). The page also has a **"Try the rule"** preview that shows the effect of the current form on a sample cart, including changes that have not been saved yet.
 
 ## Testing
 
@@ -148,6 +148,7 @@ wc-sticker-discount/
 | `plugin_action_links_{plugin}` | "Settings" link on the Plugins screen. |
 | `admin_menu`, `load-{page}` | Add the WooCommerce → Sticker Discount page and save it. |
 | `admin_init` | Redirect the old WooCommerce → Settings → Sticker Discount tab URL to the new page. |
+| `in_admin_header` | On the plugin page only, remove other plugins' admin notices; the page's own messages still show. |
 | `woocommerce_screen_ids` | Load the WooCommerce admin styles and scripts on that page. |
 | `admin_enqueue_scripts` | Load the page's own stylesheet and script. |
 | `woocommerce_admin_field_wcsd_category_search` | Output the AJAX category search field. |

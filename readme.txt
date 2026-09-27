@@ -43,7 +43,7 @@ All rules can be changed in WooCommerce > Sticker Discount.
 
 * Enable - switch the discount on or off.
 * Discount label - text of the cart/checkout line (required). For percentage discounts the rate is appended, e.g. "Sticker Discount (10%)".
-* Eligible categories - products in these categories (and their sub-categories) are treated as stickers. Default: `stickers`.
+* Eligible categories - products in these categories (and their sub-categories) are treated as stickers (required: at least one). Default: `stickers`.
   Type at least 3 characters to search categories (AJAX, like the Upsells field); categories without products are included.
 * Minimum quantity - total eligible quantity required. Default: 5.
 * Discount type - percentage of the eligible products, or a fixed amount off them (never more than their total). Default: percentage.
@@ -116,6 +116,7 @@ WordPress / WooCommerce hooks:
 * `plugin_action_links_{plugin}` - "Settings" link on the Plugins screen.
 * `admin_menu` / `load-{page}` - add the WooCommerce > Sticker Discount page and save it.
 * `admin_init` - redirect the old WooCommerce > Settings > Sticker Discount tab URL to the new page.
+* `in_admin_header` - on the plugin page only, remove other plugins' admin notices (the page's own messages still show).
 * `woocommerce_screen_ids` - load the WooCommerce admin styles and scripts on that page.
 * `admin_enqueue_scripts` - load the page's own stylesheet and preview script.
 * `woocommerce_admin_field_wcsd_category_search` - output the AJAX category search field.

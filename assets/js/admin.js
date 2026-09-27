@@ -57,6 +57,24 @@
 				}
 			}
 		} ).addClass( 'enhanced' );
+
+		// The real <select> is hidden behind the search box, so show the "required" message ourselves.
+		var $container = $select.next( '.select2-container' );
+		var $error = $( '<p class="wcsd-field-error" role="alert"></p>' ).text( data.i18n.categoryRequired ).hide().insertAfter( $container );
+
+		$select.on( 'invalid', function ( event ) {
+			event.preventDefault();
+			$container.addClass( 'wcsd-has-error' );
+			$error.show();
+			$container[ 0 ].scrollIntoView( { block: 'center' } );
+		} );
+
+		$select.on( 'change', function () {
+			if ( ( $select.val() || [] ).length ) {
+				$container.removeClass( 'wcsd-has-error' );
+				$error.hide();
+			}
+		} );
 	} );
 
 	if ( ! $preview.length ) {

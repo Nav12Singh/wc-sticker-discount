@@ -14,6 +14,26 @@
 	max-width: 1180px;
 }
 
+/* Other plugins' notices are removed in PHP; this also hides ones injected with JavaScript. */
+.woocommerce_page_wcsd-sticker-discount #wpbody-content .notice:not(.inline),
+.woocommerce_page_wcsd-sticker-discount #wpbody-content .updated:not(.inline),
+.woocommerce_page_wcsd-sticker-discount #wpbody-content .error:not(.inline),
+.woocommerce_page_wcsd-sticker-discount #wpbody-content .update-nag {
+	display: none !important;
+}
+
+/* Required category field */
+.wcsd-admin .wcsd-field-error {
+	margin: 6px 0 0;
+	color: #d63638;
+	font-weight: 500;
+}
+
+.wcsd-admin .select2-container.wcsd-has-error .select2-selection {
+	border-color: #d63638;
+	box-shadow: 0 0 0 1px #d63638;
+}
+
 /* Banner: plugin name and version on a navy stripe */
 
 .wcsd-admin .wcsd-banner {
@@ -156,6 +176,8 @@
 
 /* Enhanced selects get a fixed pixel width when the page loads; never let it exceed the field. */
 .wcsd-admin .wcsd-form .select2-container,
+.wcsd-admin .wcsd-form .select2-search--inline,
+.wcsd-admin .wcsd-form .select2-search__field,
 .wcsd-admin .wcsd-form .form-table input[type="text"],
 .wcsd-admin .wcsd-form .form-table select {
 	max-width: 100%;
