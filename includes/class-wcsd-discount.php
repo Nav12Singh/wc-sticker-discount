@@ -105,31 +105,41 @@ class WCSD_Discount {
 	/**
 	 * Calculate the discount for a cart.
 	 *
-	 * The discount is based on what the customer pays for the eligible lines: after coupons,
-	 * and including tax when prices are entered including tax. It is then split between the
-	 * net price and each tax rate in the same proportion as those lines.
+	 * The discount is based on the eligible lines' price before coupons (including tax when
+	 * prices are entered including tax), so applying a coupon does not change it. It is capped
+	 * at what is still left to pay for those lines after coupons, so it never comes off other
+	 * products. It is then split between the net price and each tax rate in the same
+	 * proportion as those lines.
 	 *
 	 * @param WC_Cart $cart Cart to inspect. Line totals must already be calculated.
 	 * @return array {
 	 *     @type int   $eligible_qty   Total quantity of eligible products.
-	 *     @type float $eligible_total Amount paid for the eligible lines.
+	 *     @type float $eligible_total Price of the eligible lines before coupons.
+	 *     @type float $eligible_paid  Amount left to pay for the eligible lines after coupons.
 	 *     @type float $amount         Discount amount, 0 when the cart does not qualify.
 	 *     @type float $net_amount     Discount amount excluding tax.
 	 *     @type array $taxes          Tax part of the discount, keyed by tax rate ID.
 	 * }
 	 */
 	public function calculate( $cart ) {
-		$eligible_qty   = 0;
-		$eligible_net   = 0.0;
-		$eligible_taxes = array();
+		$eligible_qty            = 0;
+		$eligible_subtotal       = 0.0;
+		$eligible_subtotal_taxes = 0.0;
+		$eligible_net            = 0.0;
+		$eligible_taxes          = array();
 
 		foreach ( $cart->get_cart() as $cart_item ) {
 			if ( empty( $cart_item['data'] ) || ! $this->is_eligible( $cart_item['data'], $cart_item ) ) {
 				continue;
 			}
 
-			$eligible_qty += (int) $cart_item['quantity'];
-			$eligible_net += (float) $cart_item['line_total'];
+			$eligible_qty      += (int) $cart_item['quantity'];
+			$eligible_subtotal += (float) $cart_item['line_subtotal'];
+			$eligible_net      += (float) $cart_item['line_total'];
+
+			if ( isset( $cart_item['line_tax_data']['subtotal'] ) ) {
+				$eligible_subtotal_taxes += array_sum( array_map( 'floatval', (array) $cart_item['line_tax_data']['subtotal'] ) );
+			}
 
 			$line_taxes = isset( $cart_item['line_tax_data']['total'] ) ? (array) $cart_item['line_tax_data']['total'] : array();
 
@@ -138,8 +148,10 @@ class WCSD_Discount {
 			}
 		}
 
-		$eligible_total = wc_prices_include_tax() ? $eligible_net + array_sum( $eligible_taxes ) : $eligible_net;
-		$amount         = 0.0;
+		$prices_include_tax = wc_prices_include_tax();
+		$eligible_total     = $prices_include_tax ? $eligible_subtotal + $eligible_subtotal_taxes : $eligible_subtotal;
+		$eligible_paid      = $prices_include_tax ? $eligible_net + array_sum( $eligible_taxes ) : $eligible_net;
+		$amount             = 0.0;
 
 		if ( $eligible_qty >= $this->settings->get_min_qty() && $eligible_total > 0 ) {
 			$amount = $this->get_discount_amount( $eligible_total );
@@ -150,12 +162,12 @@ class WCSD_Discount {
 		 *
 		 * @param float   $amount         Discount amount (positive number).
 		 * @param int     $eligible_qty   Total quantity of eligible products.
-		 * @param float   $eligible_total Amount paid for the eligible lines.
+		 * @param float   $eligible_total Price of the eligible lines before coupons.
 		 * @param WC_Cart $cart           Cart being calculated.
 		 */
 		$amount   = (float) apply_filters( 'wcsd_discount_amount', $amount, $eligible_qty, $eligible_total, $cart );
-		$amount   = max( 0, min( $amount, $eligible_total ) );
-		$ratio    = $eligible_total > 0 ? $amount / $eligible_total : 0;
+		$amount   = max( 0, min( $amount, $eligible_paid ) );
+		$ratio    = $eligible_paid > 0 ? $amount / $eligible_paid : 0;
 		$decimals = wc_get_price_decimals();
 
 		$taxes = array();
@@ -165,11 +177,12 @@ class WCSD_Discount {
 		}
 
 		// When prices include tax the amount already contains the tax, so net + tax must add up to it exactly.
-		$net_amount = wc_prices_include_tax() ? round( $amount - array_sum( $taxes ), $decimals ) : $amount;
+		$net_amount = $prices_include_tax ? round( $amount - array_sum( $taxes ), $decimals ) : $amount;
 
 		return array(
 			'eligible_qty'   => $eligible_qty,
 			'eligible_total' => $eligible_total,
+			'eligible_paid'  => $eligible_paid,
 			'amount'         => $amount,
 			'net_amount'     => $net_amount,
 			'taxes'          => $taxes,
@@ -207,7 +220,7 @@ class WCSD_Discount {
 	/**
 	 * Discount for the eligible lines, rounded to the store's price decimals.
 	 *
-	 * @param float $eligible_total Amount paid for the eligible lines.
+	 * @param float $eligible_total Price of the eligible lines before coupons.
 	 * @return float
 	 */
 	private function get_discount_amount( $eligible_total ) {

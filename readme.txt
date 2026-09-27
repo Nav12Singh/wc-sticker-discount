@@ -47,6 +47,7 @@ All rules can be changed in WooCommerce > Sticker Discount.
   Type at least 3 characters to search categories (AJAX, like the Upsells field); categories without products are included.
 * Minimum quantity - total eligible quantity required. Default: 5.
 * Discount type - percentage of the eligible products, or a fixed amount off them (never more than their total). Default: percentage.
+  Coupons do not change the discount; they apply on top of it.
 * Discount value - default: 10.
 * Sale products - exclude products that are already on sale. Default: on.
 
@@ -73,6 +74,7 @@ Then, as a guest and again as a logged-in customer:
    The values are stored as order meta `_wcsd_discount_amount` (the discount as shown in the cart: including tax
    when the store displays prices including tax) and `_wcsd_eligible_qty`.
 7. Change the settings (e.g. fixed amount 7, minimum 6, sale products included) and repeat step 1 to see the new rules apply.
+8. Apply a coupon (e.g. a fixed cart coupon of 10). Expected: the sticker discount stays -5.00 and the coupon applies on top.
 
 Steps 1-5 behave the same on the block Cart/Checkout pages and on classic pages using the
 `[woocommerce_cart]` and `[woocommerce_checkout]` shortcodes.
@@ -131,6 +133,7 @@ Filters provided by the plugin:
 * `wcsd_settings` - override settings in code.
 * `wcsd_is_product_eligible` - change how an eligible sticker is identified ( $is_eligible, $product, $cart_item ).
 * `wcsd_discount_amount` - adjust the calculated discount ( $amount, $eligible_qty, $eligible_total, $cart ).
+  `$eligible_total` is the eligible lines' price before coupons.
 
 == Assumptions ==
 
@@ -140,10 +143,11 @@ Filters provided by the plugin:
   single variation on sale is excluded while its siblings are not.
 * On-sale stickers neither receive the discount nor count towards the minimum quantity.
 * The minimum is based on the total quantity of eligible stickers (2 x A + 3 x B = 5), not the number of different products.
-* The discount is calculated on what the customer pays for the eligible lines: after any coupons, and including tax
-  when prices are entered including tax. So 10% of stickers that cost 50.00 is always 5.00 off those stickers, and a
-  coupon that already made the stickers free leaves nothing to discount. A fixed amount is treated the same way
-  (including tax when prices include tax) and is never more than the eligible lines' total.
+* The discount is calculated on the eligible lines' price before coupons (including tax when prices are entered
+  including tax), so applying a coupon does not change it: 10% of stickers that cost 50.00 is always 5.00, and the
+  coupon applies on top. The discount is capped at what is still left to pay for those stickers after coupons, so a
+  coupon that already made them (almost) free never pushes the discount onto other products. A fixed amount is
+  treated the same way and is never more than that remaining amount.
 * The discount is split between the net price and each tax rate in the same proportion as the eligible lines, so only
   the stickers' tax is reduced.
 
@@ -163,3 +167,4 @@ Filters provided by the plugin:
 
 = 1.0.0 =
 * Initial release.
+* Fix: applying a coupon no longer changes the sticker discount amount.

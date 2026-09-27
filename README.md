@@ -20,7 +20,7 @@ When the cart contains **5 or more eligible stickers**, a **10% discount** is ap
 - Saves the discount amount and eligible quantity as order meta.
 - Works for guests and logged-in customers, on the block Cart/Checkout and the classic `[woocommerce_cart]` / `[woocommerce_checkout]` shortcodes.
 - Compatible with High-Performance Order Storage (HPOS) and the Cart/Checkout blocks.
-- Correct with coupons and taxes (prices including or excluding tax, mixed tax rates).
+- Coupons do not change the sticker discount; they apply on top of it. Correct with taxes too (prices including or excluding tax, mixed tax rates).
 - Admin page with an AJAX category search and a live "Try the rule" preview.
 
 ## Environment used for development and testing
@@ -82,6 +82,7 @@ Run these as a guest and again as a logged-in customer:
 5. Check out, e.g. with Cash on delivery. **Expected:** order total 95 with the discount fee line.
 6. Open the order in **WooCommerce → Orders**. **Expected:** the "Sticker Discount" panel shows Discount amount 5.00 and Eligible sticker quantity 5.
 7. Change the settings (e.g. fixed amount 7, minimum 6, sale products included) and repeat step 1 to see the new rules apply.
+8. Apply a coupon, e.g. a fixed cart coupon of 10. **Expected:** the sticker discount stays −5.00 and the coupon applies on top (total 85 instead of 95).
 
 Steps 1–5 behave the same on the block Cart/Checkout and on classic shortcode pages.
 
@@ -165,7 +166,7 @@ wc-sticker-discount/
 |---|---|---|
 | `wcsd_settings` | `$values` | Override settings in code. |
 | `wcsd_is_product_eligible` | `$is_eligible, $product, $cart_item` | Change how an eligible sticker is identified. |
-| `wcsd_discount_amount` | `$amount, $eligible_qty, $eligible_total, $cart` | Adjust the calculated discount. |
+| `wcsd_discount_amount` | `$amount, $eligible_qty, $eligible_total, $cart` | Adjust the calculated discount. `$eligible_total` is the eligible lines' price before coupons. |
 
 Example: also treat products tagged `sticker` as eligible.
 
@@ -188,7 +189,8 @@ add_filter(
 - "On sale" means `WC_Product::is_on_sale()`, which respects scheduled sale dates. It is checked per cart line, so one variation on sale is excluded while its siblings are not.
 - On-sale stickers neither receive the discount nor count towards the minimum quantity.
 - The minimum is the total quantity of eligible stickers (2 × A + 3 × B = 5), not the number of different products.
-- The discount is calculated on what the customer pays for the eligible lines: after coupons, and including tax when prices are entered including tax. So 10% of stickers costing 50.00 is always 5.00 off those stickers, and a coupon that already made the stickers free leaves nothing to discount. A fixed amount is treated the same way and is never more than the eligible lines' total.
+- The discount is calculated on the eligible lines' price **before coupons** (including tax when prices are entered including tax), so applying a coupon does not change it: 10% of stickers costing 50.00 is always 5.00, and the coupon applies on top.
+- The discount is capped at what is still left to pay for those stickers after coupons, so a coupon that already made them (almost) free never pushes the discount onto other products. A fixed amount is treated the same way.
 - The discount is split between the net price and each tax rate in the same proportion as the eligible lines, so only the stickers' tax is reduced.
 
 ## Known limitations
@@ -208,3 +210,4 @@ Deleting the plugin from the Plugins screen removes its options. Order meta is k
 ### 1.0.0
 
 - Initial release.
+- Fix: applying a coupon no longer changes the sticker discount amount.
