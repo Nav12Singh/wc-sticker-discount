@@ -1,0 +1,396 @@
+/**
+ * WooCommerce > Sticker Discount admin page.
+ */
+
+.wcsd-admin {
+	--wcsd-ink: #1d2327;
+	--wcsd-muted: #50575e;
+	--wcsd-line: #dcdcde;
+	--wcsd-accent: var(--wp-admin-theme-color, #2271b1);
+	--wcsd-sticker: #ffcc33;
+	--wcsd-good: #00761f;
+	--wcsd-liner: #edf2f7;
+	--wcsd-brand: #16324f;
+	max-width: 1180px;
+}
+
+/* Banner: plugin name and version on a navy stripe */
+
+.wcsd-admin .wcsd-banner {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px 14px;
+	clear: both;
+	margin: 12px 0 24px;
+	padding: 16px 20px;
+	border-radius: 10px;
+	background-color: var(--wcsd-brand);
+	background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0 12px, transparent 12px 24px);
+	color: #fff;
+}
+
+.wcsd-admin .wcsd-banner__badge {
+	width: 38px;
+	height: 38px;
+	border: 3px solid #fff;
+	border-radius: 50%;
+	box-sizing: border-box;
+	background: var(--wcsd-sticker);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+	color: var(--wcsd-brand);
+	font-size: 18px;
+	line-height: 32px;
+	text-align: center;
+	transform: rotate(-10deg);
+}
+
+.wcsd-admin .wcsd-banner__text {
+	flex: 1 1 220px;
+	min-width: 0;
+}
+
+.wcsd-admin .wcsd-banner__heading {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 12px;
+}
+
+.wcsd-admin .wcsd-banner__description {
+	margin: 4px 0 0;
+	color: #c3d3e4;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.wcsd-admin .wcsd-banner .wcsd-banner__title {
+	margin: 0;
+	padding: 0;
+	color: #fff;
+	font-size: 20px;
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+.wcsd-admin .wcsd-banner__version {
+	padding: 2px 9px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.14);
+	color: #dbe6f2;
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 1.5;
+	font-variant-numeric: tabular-nums;
+}
+
+.wcsd-admin .wcsd-banner .wcsd-status {
+	margin-left: auto;
+}
+
+.wcsd-admin .wcsd-status {
+	padding: 3px 10px;
+	border-radius: 999px;
+	background: #fff;
+	color: var(--wcsd-good);
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 1.5;
+}
+
+.wcsd-admin .wcsd-status::before {
+	content: "";
+	display: inline-block;
+	width: 7px;
+	height: 7px;
+	margin-right: 6px;
+	border-radius: 50%;
+	background: currentColor;
+	vertical-align: 1px;
+}
+
+.wcsd-admin .wcsd-status.is-off {
+	background: #dcdcde;
+	color: var(--wcsd-muted);
+}
+
+/* Two columns: settings and preview */
+
+.wcsd-admin .wcsd-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 340px;
+	gap: 24px;
+	align-items: start;
+}
+
+.wcsd-admin .wcsd-form {
+	padding: 4px 24px 0;
+	border: 1px solid #c3c4c7;
+	background: #fff;
+}
+
+.wcsd-admin .wcsd-form h2 {
+	margin: 20px 0 2px;
+	color: var(--wcsd-ink);
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.wcsd-admin .wcsd-form h2 ~ h2 {
+	padding-top: 20px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.wcsd-admin .wcsd-form h2 + div p {
+	margin: 4px 0 0;
+	color: var(--wcsd-muted);
+}
+
+.wcsd-admin .wcsd-form .form-table {
+	margin-top: 4px;
+}
+
+.wcsd-admin .wcsd-form .form-table th {
+	width: 190px;
+}
+
+/* Enhanced selects get a fixed pixel width when the page loads; never let it exceed the field. */
+.wcsd-admin .wcsd-form .select2-container,
+.wcsd-admin .wcsd-form .form-table input[type="text"],
+.wcsd-admin .wcsd-form .form-table select {
+	max-width: 100%;
+}
+
+.wcsd-admin .wcsd-form .submit {
+	margin: 8px -24px 0;
+	padding: 16px 24px;
+	border-top: 1px solid var(--wcsd-line);
+	background: #f6f7f7;
+}
+
+/* Preview: a sticker sheet on its backing liner */
+
+.wcsd-admin .wcsd-preview {
+	position: sticky;
+	top: 46px;
+	padding: 20px;
+	border-radius: 14px;
+	background-color: var(--wcsd-liner);
+	background-image: radial-gradient(rgba(29, 35, 39, 0.09) 1px, transparent 1px);
+	background-size: 14px 14px;
+	color: var(--wcsd-ink);
+}
+
+.wcsd-admin .wcsd-preview[hidden] {
+	display: none;
+}
+
+.wcsd-admin .wcsd-preview h2 {
+	margin: 0 0 6px;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.wcsd-admin .wcsd-preview__intro {
+	margin: 0 0 16px;
+	color: var(--wcsd-muted);
+}
+
+.wcsd-admin .wcsd-stepper {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 16px;
+}
+
+.wcsd-admin .wcsd-stepper__button {
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 1px solid #8c8f94;
+	border-radius: 50%;
+	background: #fff;
+	color: var(--wcsd-ink);
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.wcsd-admin .wcsd-stepper__button:hover:not(:disabled) {
+	border-color: var(--wcsd-accent);
+	color: var(--wcsd-accent);
+}
+
+.wcsd-admin .wcsd-stepper__button:focus-visible {
+	outline: 2px solid var(--wcsd-accent);
+	outline-offset: 2px;
+}
+
+.wcsd-admin .wcsd-stepper__button:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+.wcsd-admin .wcsd-stepper__count {
+	min-width: 90px;
+	font-size: 15px;
+	font-weight: 600;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+}
+
+.wcsd-admin .wcsd-sheet {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0 0 12px;
+	padding: 0;
+	list-style: none;
+}
+
+.wcsd-admin .wcsd-sheet li {
+	width: 30px;
+	height: 30px;
+	margin: 0;
+	border-radius: 50%;
+	box-sizing: border-box;
+}
+
+.wcsd-admin .wcsd-sticker {
+	border: 3px solid #fff;
+	background: var(--wcsd-sticker);
+	box-shadow: 0 1px 2px rgba(29, 35, 39, 0.3);
+	transform: rotate(-6deg);
+}
+
+.wcsd-admin .wcsd-sticker:nth-child(3n) {
+	transform: rotate(5deg);
+}
+
+.wcsd-admin .wcsd-sticker:nth-child(4n + 1) {
+	transform: rotate(-12deg);
+}
+
+.wcsd-admin .wcsd-slot {
+	border: 2px dashed #a7aaad;
+}
+
+.wcsd-admin .wcsd-sheet.is-unlocking .wcsd-sticker {
+	animation: wcsd-peel 0.45s ease-out;
+}
+
+@keyframes wcsd-peel {
+	50% {
+		transform: scale(1.18) rotate(0deg);
+	}
+}
+
+.wcsd-admin .wcsd-preview__status {
+	min-height: 20px;
+	margin: 0 0 14px;
+	color: var(--wcsd-muted);
+	font-weight: 500;
+}
+
+.wcsd-admin .wcsd-preview__status.is-applied {
+	color: var(--wcsd-good);
+}
+
+.wcsd-admin .wcsd-receipt {
+	margin: 0;
+	padding: 12px 14px;
+	border-radius: 6px;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(29, 35, 39, 0.12);
+	font-variant-numeric: tabular-nums;
+}
+
+.wcsd-admin .wcsd-receipt__row {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 4px 0;
+}
+
+.wcsd-admin .wcsd-receipt__row[hidden] {
+	display: none;
+}
+
+.wcsd-admin .wcsd-receipt dt,
+.wcsd-admin .wcsd-receipt dd {
+	margin: 0;
+}
+
+.wcsd-admin .wcsd-receipt__row--discount dd {
+	color: var(--wcsd-good);
+}
+
+.wcsd-admin .wcsd-receipt__row--total {
+	margin-top: 6px;
+	padding-top: 10px;
+	border-top: 1px dashed var(--wcsd-line);
+	font-size: 15px;
+	font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+	.wcsd-admin .wcsd-layout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.wcsd-admin .wcsd-preview {
+		position: static;
+	}
+}
+
+/* Tablet, single column: controls on the left, receipt on the right */
+@media (min-width: 600px) and (max-width: 1100px) {
+	.wcsd-admin .wcsd-preview:not([hidden]) {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		column-gap: 32px;
+		align-items: start;
+	}
+
+	.wcsd-admin .wcsd-preview > * {
+		grid-column: 1;
+	}
+
+	.wcsd-admin .wcsd-preview .wcsd-receipt {
+		grid-column: 2;
+		grid-row: 1 / span 5;
+		align-self: center;
+	}
+}
+
+@media (max-width: 782px) {
+	.wcsd-admin .wcsd-form {
+		padding: 4px 12px 0;
+	}
+
+	.wcsd-admin .wcsd-form .submit {
+		margin: 8px -12px 0;
+		padding: 16px 12px;
+	}
+
+	.wcsd-admin .wcsd-banner {
+		padding: 14px 16px;
+	}
+
+	/* Line the wrapped status pill up with the text, not the badge. */
+	.wcsd-admin .wcsd-banner .wcsd-status {
+		margin-left: 52px;
+	}
+
+	.wcsd-admin .wcsd-stepper__button {
+		width: 44px;
+		height: 44px;
+		font-size: 20px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.wcsd-admin .wcsd-sheet.is-unlocking .wcsd-sticker {
+		animation: none;
+	}
+}
